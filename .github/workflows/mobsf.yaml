@@ -1,0 +1,58 @@
+name: MobSF apk scan
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Path to artifact
+        required: false
+        type: string
+      release:
+        description: Name of release
+        required: false
+        type: string
+
+jobs:
+  MobSF_scan:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Download artifact
+        run: |
+          curl -O "https://hjwc1879nd.blob.core.windows.net/test/com.afwsamples.testdpc.apk"
+
+      - name: Fix Permissions for MobSF Docker
+        run: |
+          sudo mkdir -p /home/runner/work/_temp/_github_home
+          sudo chown -R 9901:9901 /home/runner/work/_temp/_github_home
+          sudo mkdir -p /home/runner/work/$REPO_NAME/$REPO_NAME
+          sudo chown -R 9901:9901 /home/runner/work/$REPO_NAME/$REPO_NAME
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+
+      - name: Run MobSF Analysis
+        uses: fundacaocerti/mobsf-action@96f53daa4d68a2caaeb5caf23ded96a10ebaf87b #v1.7.1
+        env:
+          INPUT_FILE_NAME: /home/runner/_work/pentesters-lab/pentesters-lab/com.afwsamples.testdpc.apk
+          SCAN_TYPE: apk
+          OUTPUT_FILE_NAME: mobsf-report
+
+      - name: Cleanup MobSF Permissions
+        run: |
+          sudo chown -R runner:docker /home/runner/_work/_temp/_github_home
+          sudo chown -R runner:docker /home/runner/_work/$REPO_NAME/$REPO_NAME
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+
+      - name: Upload MobSF Analysis PDF Result
+        uses: actions/upload-artifact@v2
+        with:
+          name: mobsf-report.pdf
+          path: mobsf-report.pdf
+
+      - name: Upload MobSF Analysis JSON Result
+        uses: actions/upload-artifact@v2
+        with:
+          name: mobsf-report.json
+          path: mobsf-report.json
