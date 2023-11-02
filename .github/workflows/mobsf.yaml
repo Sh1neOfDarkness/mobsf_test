@@ -34,7 +34,7 @@ jobs:
       - name: Run MobSF Analysis
         uses: Sh1neOfDarkness/mobsf-action@master #v1.7.1
         env:
-          INPUT_FILE_NAME: com.afwsamples.testdpc1.apk
+          INPUT_FILE_NAME: com.afwsamples.testdpc.apk
           SCAN_TYPE: apk
           OUTPUT_FILE_NAME: mobsf-report
 
